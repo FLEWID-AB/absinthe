@@ -134,8 +134,10 @@ defmodule Absinthe.Logger do
   def filter_document_variables(body, filter_variables \\ variables_to_filter())
 
   def filter_document_variables(body, variables_to_filter) do
-    regex = ~r/(#{Enum.join(variables_to_filter, "|")}):\s?([^,)]+)/
-    Regex.replace(regex, body, "\\g{1}: [FILTERED]")
+    regex = ~r/([,(]\s?)(#{Enum.join(variables_to_filter, "|")}):\s?([^,$)]+)/
+    Regex.replace(regex, body, fn whole, g1, g2, g3 ->
+      if String.trim(g3) == "", do: whole, else: g1 <> g2 <> ": " <> "[FILTERED]"
+    end)
   end
 
   @spec variables_to_filter() :: [String.t()]

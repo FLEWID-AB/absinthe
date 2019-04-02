@@ -81,5 +81,18 @@ defmodule Absinthe.LoggerTest do
     test "it filters out args when not strings" do
       assert String.replace(@document, "12", @filtered) == Absinthe.Logger.filter_document_variables(@document)
     end
+
+    @document """
+    mutation Login($email: String!, $password: String!, $token: String!){
+      login(email: $email, password: $password, token: $token) {
+        user {
+          id
+        }
+      }
+    }
+    """
+    test "it does not filter out variables" do
+      assert @document == Absinthe.Logger.filter_document_variables(@document)
+    end
   end
 end
