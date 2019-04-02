@@ -54,4 +54,32 @@ defmodule Absinthe.LoggerTest do
       assert "%{}" == Absinthe.Logger.document(@document)
     end
   end
+
+  describe "Absinthe.Logger.filter_document_variables/1" do
+    @document """
+    mutation {
+      login(email: "test@foo.com", password: "abc", token: "abc") {
+        user {
+          id
+        }
+      }
+    }
+    """
+    test "it filters out args" do
+      assert String.replace(@document, "\"abc\"", @filtered) == Absinthe.Logger.filter_document_variables(@document)
+    end
+
+    @document """
+    mutation {
+      login(email: "test@foo.com", password: 12, token: 12) {
+        user {
+          id
+        }
+      }
+    }
+    """
+    test "it filters out args when not strings" do
+      assert String.replace(@document, "12", @filtered) == Absinthe.Logger.filter_document_variables(@document)
+    end
+  end
 end

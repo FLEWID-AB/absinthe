@@ -95,7 +95,9 @@ defmodule Absinthe.Logger do
   end
 
   def document(document) when is_binary(document) do
-    String.trim(document)
+    document
+    |> String.trim()
+    |> filter_document_variables()
   end
 
   def document(other) do
@@ -126,6 +128,15 @@ defmodule Absinthe.Logger do
   end
 
   def filter_variables(other, _filter_variables), do: other
+
+  @spec filter_document_variables(String.t()) :: String.t()
+  @spec filter_document_variables(String.t(), [String.t()]) :: String.t()
+  def filter_document_variables(body, filter_variables \\ variables_to_filter())
+
+  def filter_document_variables(body, variables_to_filter) do
+    regex = ~r/(#{Enum.join(variables_to_filter, "|")}):\s?([^,)]+)/
+    Regex.replace(regex, body, "\\g{1}: [FILTERED]")
+  end
 
   @spec variables_to_filter() :: [String.t()]
   defp variables_to_filter do
